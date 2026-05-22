@@ -24,7 +24,6 @@ public class User {
 
     private String fullName;
     
-    // Campos extraídos de los requisitos para unificar la identidad
     @Column(unique = true)
     private String documentNumber;
     private String phone;
@@ -34,7 +33,6 @@ public class User {
 
     private boolean active;
 
-    // SOFT LINK: Referencia al ID en la base de datos availability_db
     @Column(name = "doctor_id")
     private Long doctorId;
 }
