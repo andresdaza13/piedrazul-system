@@ -6,8 +6,8 @@ spring:
     name: booking-service
   datasource:
     url: jdbc:postgresql://localhost:5432/booking_db
-    username: admin
-    password: password
+    username: postgres
+    password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
