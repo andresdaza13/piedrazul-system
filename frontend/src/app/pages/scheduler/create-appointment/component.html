@@ -1,0 +1,117 @@
+<div class="row mb-4">
+  <div class="col">
+    <h2>Nueva Cita - WhatsApp</h2>
+    <p class="text-muted">Registra una cita para un paciente contactado por WhatsApp</p>
+  </div>
+  <div class="col-auto">
+    <a routerLink="/agendador" class="btn btn-outline-secondary">
+      Volver al listado
+    </a>
+  </div>
+</div>
+
+<div *ngIf="success" class="alert alert-success">
+  <h5>Cita creada exitosamente!</h5>
+  <p>La cita fue registrada y el evento fue publicado.</p>
+  <button class="btn btn-success" (click)="reset()">Crear otra cita</button>
+</div>
+
+<div *ngIf="!success">
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Datos del Paciente</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Numero de Documento *</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="patient.documentNumber" placeholder="123456789">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Nombres *</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="patient.firstName" placeholder="Maria">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Apellidos *</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="patient.lastName" placeholder="Lopez">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Celular *</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="patient.phone" placeholder="3001234567">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Genero *</label>
+          <select class="form-select" [(ngModel)]="patient.gender">
+            <option value="">Seleccione</option>
+            <option value="HOMBRE">Hombre</option>
+            <option value="MUJER">Mujer</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Fecha de Nacimiento</label>
+          <input type="date" class="form-control" [(ngModel)]="patient.birthDate">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Correo Electronico</label>
+          <input type="email" class="form-control"
+                 [(ngModel)]="patient.email" placeholder="correo@email.com">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Datos de la Cita</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Medico / Terapista *</label>
+          <select class="form-select" [(ngModel)]="appointment.doctorId"
+                  (change)="onDoctorOrDateChange()">
+            <option [ngValue]="null">Seleccione un medico</option>
+            <option *ngFor="let doctor of doctors" [ngValue]="doctor.id">
+              {{ doctor.fullName }} - {{ doctor.specialty }}
+            </option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Fecha *</label>
+          <input type="date" class="form-control"
+                 [(ngModel)]="appointment.date"
+                 (change)="onDoctorOrDateChange()">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Hora disponible *</label>
+          <select class="form-select" [(ngModel)]="appointment.time"
+                  [disabled]="availableSlots.length === 0">
+            <option value="">
+              {{ availableSlots.length === 0 ? 'Seleccione medico y fecha' : 'Seleccione hora' }}
+            </option>
+            <option *ngFor="let slot of availableSlots" [value]="slot">
+              {{ slot }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-grid">
+    <button class="btn btn-primary btn-lg" (click)="submit()"
+            [disabled]="loading || !patient.documentNumber || !patient.firstName
+                        || !patient.lastName || !patient.phone || !patient.gender
+                        || !appointment.doctorId || !appointment.date || !appointment.time">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+      {{ loading ? 'Procesando...' : 'Crear Cita' }}
+    </button>
+  </div>
+</div>

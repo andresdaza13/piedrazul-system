@@ -1,0 +1,75 @@
+<div class="row mb-4">
+  <div class="col">
+    <h2>Configurar Disponibilidad</h2>
+    <p class="text-muted">Configura los horarios de atencion de cada medico</p>
+  </div>
+  <div class="col-auto">
+    <a routerLink="/admin" class="btn btn-outline-secondary">
+      Volver a Medicos
+    </a>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Parametros de Disponibilidad</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="success" class="alert alert-success">
+          Disponibilidad configurada exitosamente
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Medico / Terapista *</label>
+            <select class="form-select" [(ngModel)]="config.doctorId">
+              <option [ngValue]="null">Seleccione un medico</option>
+              <option *ngFor="let doctor of doctors" [ngValue]="doctor.id">
+                {{ doctor.fullName }} - {{ doctor.specialty }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Dia de la semana *</label>
+            <select class="form-select" [(ngModel)]="config.dayOfWeek">
+              <option value="">Seleccione un dia</option>
+              <option *ngFor="let day of daysOfWeek" [value]="day.value">
+                {{ day.label }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Hora inicio *</label>
+            <input type="time" class="form-control" [(ngModel)]="config.startTime">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Hora fin *</label>
+            <input type="time" class="form-control" [(ngModel)]="config.endTime">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Intervalo (minutos) *</label>
+            <select class="form-select" [(ngModel)]="config.intervalMinutes">
+              <option [ngValue]="15">15 minutos</option>
+              <option [ngValue]="20">20 minutos</option>
+              <option [ngValue]="30">30 minutos</option>
+              <option [ngValue]="45">45 minutos</option>
+              <option [ngValue]="60">60 minutos</option>
+            </select>
+          </div>
+        </div>
+        <div class="d-grid mt-4">
+          <button class="btn btn-primary btn-lg" (click)="save()"
+                  [disabled]="loading || !config.doctorId || !config.dayOfWeek
+                              || !config.startTime || !config.endTime">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ loading ? 'Guardando...' : 'Guardar Configuracion' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

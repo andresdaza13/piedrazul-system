@@ -1,0 +1,85 @@
+<div class="row mb-4">
+  <div class="col">
+    <h2>Administracion - Medicos</h2>
+    <p class="text-muted">Gestiona los medicos y terapistas de Piedrazul</p>
+  </div>
+  <div class="col-auto">
+    <a routerLink="/admin/disponibilidad" class="btn btn-outline-primary">
+      Configurar Disponibilidad
+    </a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Nuevo Medico</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="success" class="alert alert-success">
+          Medico creado exitosamente
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Nombre Completo *</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="newDoctor.fullName"
+                 placeholder="Dr. Juan Garcia">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Especialidad *</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="newDoctor.specialty"
+                 placeholder="Medicina General">
+        </div>
+        <div class="d-grid">
+          <button class="btn btn-primary" (click)="createDoctor()"
+                  [disabled]="loading || !newDoctor.fullName || !newDoctor.specialty">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ loading ? 'Guardando...' : 'Crear Medico' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Medicos Registrados</h5>
+      </div>
+      <div class="card-body p-0">
+        <div *ngIf="doctors.length === 0" class="text-center py-4 text-muted">
+          No hay medicos registrados
+        </div>
+        <table *ngIf="doctors.length > 0" class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Especialidad</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doctor of doctors; let i = index">
+              <td>{{ doctor.id }}</td>
+              <td>{{ doctor.fullName }}</td>
+              <td>{{ doctor.specialty }}</td>
+              <td>
+                <span class="badge"
+                  [class.bg-success]="doctor.active"
+                  [class.bg-danger]="!doctor.active">
+                  {{ doctor.active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
