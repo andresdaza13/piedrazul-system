@@ -1,3 +1,4 @@
+
 package com.groupsoft.piedrazul.booking.infrastructure.controller;
 
 import com.groupsoft.piedrazul.booking.domain.exception.AppointmentOverlapException;

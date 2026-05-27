@@ -1,4 +1,4 @@
-package com.groupsoft.piedrazul.booking.infrastructure.repository;
+package com.groupsoft.piedrazul.booking.domain.Repository;
 
 import com.groupsoft.piedrazul.booking.domain.model.Appointment;
 import org.springframework.data.jpa.repository.JpaRepository;

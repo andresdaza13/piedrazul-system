@@ -11,15 +11,22 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    // Nombres clave para nuestra arquitectura
     public static final String EXCHANGE_NAME = "piedrazul.exchange";
     public static final String WHATSAPP_QUEUE = "whatsapp.notification.queue";
     public static final String ROUTING_KEY = "appointment.created";
 
+    // Cola del user-service que este servicio escucha
+    public static final String WHATSAPP_APPOINTMENT_QUEUE = "whatsapp.appointment.queue";
+
     @Bean
     public Queue whatsappQueue() {
-        // true = durable (sobrevive a reinicios de RabbitMQ)
         return new Queue(WHATSAPP_QUEUE, true);
+    }
+
+    // Declaramos la cola del user-service para que RabbitMQ la cree si no existe
+    @Bean
+    public Queue whatsappAppointmentQueue() {
+        return new Queue(WHATSAPP_APPOINTMENT_QUEUE, true);
     }
 
     @Bean
@@ -34,7 +41,7 @@ public class RabbitMQConfig {
 
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter(); // Transforma los objetos a JSON
+        return new Jackson2JsonMessageConverter();
     }
 
     @Bean

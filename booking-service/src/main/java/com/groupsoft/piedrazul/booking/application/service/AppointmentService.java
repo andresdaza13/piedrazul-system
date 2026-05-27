@@ -6,7 +6,7 @@ import com.groupsoft.piedrazul.booking.domain.event.AppointmentCreatedEvent;
 import com.groupsoft.piedrazul.booking.domain.exception.AppointmentOverlapException;
 import com.groupsoft.piedrazul.booking.domain.model.Appointment;
 import com.groupsoft.piedrazul.booking.domain.model.AppointmentStatus;
-import com.groupsoft.piedrazul.booking.infrastructure.repository.AppointmentRepository;
+import com.groupsoft.piedrazul.booking.domain.Repository.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
