@@ -32,4 +32,26 @@ class UserTest {
         assertTrue(user.isActive(), "El usuario debe nacer activo");
         assertNotNull(user.getPassword(), "Se debe haber autogenerado una contraseña UUID");
     }
+
+    @Test
+    void shouldGenerateRandomPassword() {
+
+        User user1 = User.createPatientFromWhatsApp(
+                "1", "A", "B", "123",
+                Gender.HOMBRE,
+                LocalDate.now(),
+                "a@test.com"
+        );
+
+        User user2 = User.createPatientFromWhatsApp(
+                "2", "C", "D", "456",
+                Gender.HOMBRE,
+                LocalDate.now(),
+                "b@test.com"
+        );
+
+        assertNotEquals(user1.getPassword(), user2.getPassword());
+    }
+
+    
 }

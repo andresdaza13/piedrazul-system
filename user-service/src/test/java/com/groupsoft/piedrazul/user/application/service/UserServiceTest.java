@@ -11,10 +11,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import com.groupsoft.piedrazul.user.infrastructure.config.RabbitMQConfig;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -24,6 +25,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private UserService userService;
@@ -85,4 +89,60 @@ class UserServiceTest {
         // Verificamos que se haya llamado al método save() exactamente 1 vez
         verify(userRepository, times(1)).save(any(User.class));
     }
+
+    @Test
+    void shouldReturnExistingUserWhenPhoneIsFound() {
+
+        when(userRepository.findByDocumentNumber(requestDTO.getDocumentNumber()))
+                .thenReturn(Optional.empty());
+
+        when(userRepository.findByPhone(requestDTO.getPhone()))
+                .thenReturn(Optional.of(existingUser));
+
+        User result = userService.registerOrGetUserFromWhatsApp(requestDTO);
+
+        assertNotNull(result);
+        assertEquals(existingUser.getPhone(), result.getPhone());
+
+        verify(userRepository, never()).save(any(User.class));
+    }
+    
+    @Test
+    void shouldSendMessageToRabbitMQ() {
+
+        when(userRepository.findByDocumentNumber(any()))
+                .thenReturn(Optional.of(existingUser));
+
+        userService.registerOrGetUserFromWhatsApp(requestDTO);
+
+        verify(rabbitTemplate, times(1))
+                .convertAndSend(
+                        eq(RabbitMQConfig.WHATSAPP_QUEUE),
+                        eq(requestDTO)
+                );
+    }
+
+    @Test
+    void shouldCreateUserWithCorrectInformation() {
+
+        when(userRepository.findByDocumentNumber(any()))
+                .thenReturn(Optional.empty());
+
+        when(userRepository.findByPhone(any()))
+                .thenReturn(Optional.empty());
+
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        User result = userService.registerOrGetUserFromWhatsApp(requestDTO);
+
+        assertEquals("Carlos Andres Caicedo Daza", result.getFullName());
+        assertEquals(Role.PATIENT, result.getRole());
+        assertTrue(result.isActive());
+        assertEquals(requestDTO.getDocumentNumber(), result.getUsername());
+
+        verify(userRepository).save(any(User.class));
+    }
+
+
 }
