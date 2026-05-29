@@ -31,6 +31,7 @@ class StandardSlotCalculationStrategyTest {
                 .build();
     }
 
+    // TEST: calcula correctamente los horarios disponibles
     @Test
     void shouldCalculateSlotsCorrectly() {
 
@@ -48,6 +49,7 @@ class StandardSlotCalculationStrategyTest {
         assertEquals(LocalTime.of(9,30), result.get(3));
     }
 
+    // TEST: devuelve lista vacía si la disponibilidad está inactiva
     @Test
     void shouldReturnEmptyListWhenAvailabilityInactive() {
 
@@ -64,6 +66,7 @@ class StandardSlotCalculationStrategyTest {
         assertTrue(result.isEmpty());
     }
 
+    // TEST: devuelve lista vacía si el día no coincide
     @Test
     void shouldReturnEmptyListWhenDayDoesNotMatch() {
 
@@ -78,6 +81,7 @@ class StandardSlotCalculationStrategyTest {
         assertTrue(result.isEmpty());
     }
 
+    // TEST: siempre soporta cualquier disponibilidad
     @Test
     void shouldAlwaysSupportAvailability() {
 

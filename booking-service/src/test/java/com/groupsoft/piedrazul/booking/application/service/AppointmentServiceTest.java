@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +59,7 @@ class AppointmentServiceTest {
                 .build();
     }
 
+    // TEST: crea una cita correctamente
     @Test
     void shouldCreateAppointmentSuccessfully() {
 
@@ -78,6 +82,7 @@ class AppointmentServiceTest {
         verify(eventPublisher).publishAppointmentCreatedEvent(any());
     }
 
+    // TEST: lanza una excepción cuando hay superposición de citas
     @Test
     void shouldThrowExceptionWhenAppointmentOverlaps() {
 
@@ -95,6 +100,7 @@ class AppointmentServiceTest {
         verify(eventPublisher, never()).publishAppointmentCreatedEvent(any());
     }
 
+    // TEST: devuelve citas por médico y fecha
     @Test
     void shouldReturnAppointmentsByDoctorAndDate() {
 
@@ -113,6 +119,7 @@ class AppointmentServiceTest {
         assertEquals(1L, result.get(0).getPatientId());
     }
 
+    // TEST: devuelve una lista vacía cuando no existen citas
     @Test
     void shouldReturnEmptyListWhenNoAppointmentsExist() {
 
@@ -130,6 +137,7 @@ class AppointmentServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    // TEST: publica un evento después de guardar la cita
     @Test
     void shouldPublishEventAfterSavingAppointment() {
 

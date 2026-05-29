@@ -16,6 +16,8 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +45,7 @@ class WebBookingFacadeTest {
         request.setNotes("Consulta web");
     }
 
+    // TEST: procesa correctamente una reserva web disponible
     @Test
     void shouldProcessWebBookingSuccessfully() {
 
@@ -61,6 +64,7 @@ class WebBookingFacadeTest {
         verify(appointmentService).createAppointment(any());
     }
 
+    // TEST: lanza una excepción si el horario no está disponible
     @Test
     void shouldThrowExceptionWhenTimeSlotIsUnavailable() {
 
@@ -81,6 +85,7 @@ class WebBookingFacadeTest {
                 .createAppointment(any());
     }
 
+    // TEST: transforma correctamente la solicitud antes de llamar al servicio
     @Test
     void shouldTransformRequestCorrectlyBeforeCallingService() {
 

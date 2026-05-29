@@ -79,6 +79,7 @@ class AvailabilityServiceTest {
         request.setIntervalMinutes(30);
     }
 
+    // TEST: configura la disponibilidad correctamente
     @Test
     void shouldConfigureAvailabilitySuccessfully() {
 
@@ -98,6 +99,7 @@ class AvailabilityServiceTest {
         verify(availabilityRepository).save(any(Availability.class));
     }
 
+    // TEST: lanza una excepción si el doctor no existe
     @Test
     void shouldThrowExceptionWhenDoctorDoesNotExist() {
 
@@ -114,6 +116,7 @@ class AvailabilityServiceTest {
         verify(availabilityRepository, never()).save(any());
     }
 
+    // TEST: devuelve los horarios disponibles correctamente
     @Test
     void shouldReturnAvailableSlotsSuccessfully() {
 
@@ -142,6 +145,7 @@ class AvailabilityServiceTest {
         assertTrue(result.contains(LocalTime.of(8,0)));
     }
 
+    // TEST: lanza excepción cuando existe solapamiento de citas
     @Test
     void shouldReturnEmptyListWhenDoctorDoesNotWorkThatDay() {
 
@@ -160,6 +164,7 @@ class AvailabilityServiceTest {
         assertEquals(Collections.emptyList(), result);
     }
 
+    // TEST: lanza una excepción cuando no hay estrategia complatible
     @Test
     void shouldThrowExceptionWhenNoStrategySupportsAvailability() {
 
@@ -186,6 +191,7 @@ class AvailabilityServiceTest {
         );
     }
 
+    // TEST: usa la estrategia correcta para calcular horarios
     @Test
     void shouldUseCorrectStrategyToCalculateSlots() {
 

@@ -46,6 +46,7 @@ class DoctorServiceTest {
         request.setSpecialty("Dermatologia");
     }
 
+    // TEST: crea un doctor correctamente
     @Test
     void shouldCreateDoctorSuccessfully() {
 
@@ -61,6 +62,7 @@ class DoctorServiceTest {
         verify(doctorRepository).save(any(Doctor.class));
     }
 
+    // TEST: devuelve todos los doctores correctamente
     @Test
     void shouldReturnAllDoctors() {
 
@@ -75,6 +77,7 @@ class DoctorServiceTest {
                 result.get(0).getSpecialty());
     }
 
+    // TEST: devuelve un doctor por ID correctamente
     @Test
     void shouldReturnDoctorById() {
 
@@ -87,6 +90,7 @@ class DoctorServiceTest {
         assertEquals(1L, response.getId());
     }
 
+    // TEST: lanza una excepción si el doctor no existe
     @Test
     void shouldThrowExceptionWhenDoctorNotFound() {
 
