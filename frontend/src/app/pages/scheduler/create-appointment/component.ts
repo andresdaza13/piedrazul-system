@@ -2,9 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { UserService } from '../../../core/services/user/service';
 import { AppointmentService } from '../../../core/services/appointment/service';
 import { AvailabilityService, DoctorDTO } from '../../../core/services/availability/service';
+import { buildBookingWindow } from '../../../core/utils/booking-window';
+import { toLocalDateTimeIso } from '../../../core/utils/datetime';
 
 @Component({
   selector: 'app-create-appointment',
@@ -18,6 +21,8 @@ export class CreateAppointmentComponent implements OnInit {
   loading: boolean = false;
   success: boolean = false;
   errorMessage: string = '';
+  minDate = '';
+  maxDate = '';
 
   patient = {
     documentNumber: '',
@@ -45,6 +50,11 @@ export class CreateAppointmentComponent implements OnInit {
     this.availabilityService.getDoctors().subscribe(doctors => {
       this.doctors = doctors;
     });
+    this.availabilityService.getSystemConfig().subscribe(config => {
+      const window = buildBookingWindow(config.bookingWindowWeeks);
+      this.minDate = window.minDate;
+      this.maxDate = window.maxDate;
+    });
   }
 
   onDoctorOrDateChange() {
@@ -63,30 +73,31 @@ export class CreateAppointmentComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.userService.registerFromWhatsApp(this.patient).subscribe({
+    this.userService.registerFromWhatsApp(this.patient).pipe(
+      finalize(() => {})
+    ).subscribe({
       next: (response) => {
         const patientId = response.patientId;
-        const dateTime = `${this.appointment.date}T${this.appointment.time}`;
+        const dateTime = toLocalDateTimeIso(this.appointment.date, this.appointment.time);
 
         this.appointmentService.createAppointment({
           patientId: patientId,
           doctorId: this.appointment.doctorId!,
           appointmentDate: dateTime,
           whatsappNumber: this.patient.phone,
-          notes: ''
-        }).subscribe({
-          next: () => {
-            this.success = true;
-            this.loading = false;
-          },
-          error: (err) => {
-            this.errorMessage = 'Error al crear la cita. Intente de nuevo.';
-            this.loading = false;
-          }
-        });
+          notes: 'Cita agendada por WhatsApp'
+        }).pipe(finalize(() => { this.loading = false; }))
+          .subscribe({
+            next: () => {
+              this.success = true;
+            },
+            error: (err) => {
+              this.errorMessage = err.error?.message || 'Error al crear la cita.';
+            }
+          });
       },
-      error: () => {
-        this.errorMessage = 'Error al registrar el paciente.';
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al registrar el paciente.';
         this.loading = false;
       }
     });

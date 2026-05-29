@@ -10,6 +10,27 @@
   </div>
 </div>
 
+<div class="row justify-content-center mb-4">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Ventana de Agendamiento (Requisito 4)</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="windowSuccess" class="alert alert-success py-2">
+          Ventana de agendamiento actualizada
+        </div>
+        <label class="form-label fw-bold">Semanas habilitadas para agendar citas</label>
+        <div class="input-group">
+          <input type="number" class="form-control" min="1" max="52"
+                 [(ngModel)]="bookingWindowWeeks">
+          <button class="btn btn-dark" (click)="saveBookingWindow()">Guardar ventana</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="row justify-content-center">
   <div class="col-md-8">
     <div class="card">

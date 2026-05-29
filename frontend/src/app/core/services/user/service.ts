@@ -23,4 +23,8 @@ export class UserService {
   registerFromWhatsApp(user: UserWhatsAppDTO): Observable<any> {
     return this.http.post(`${this.baseUrl}/users/whatsapp-contact`, user);
   }
+
+  registerWebPatient(user: UserWhatsAppDTO): Observable<any> {
+    return this.http.post(`${this.baseUrl}/users/web-register`, user);
+  }
 }

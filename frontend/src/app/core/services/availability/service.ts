@@ -42,4 +42,17 @@ export class AvailabilityService {
       `${this.baseUrl}/availability/slots?doctorId=${doctorId}&targetDate=${date}`
     );
   }
+
+  getSystemConfig(): Observable<{ bookingWindowWeeks: number }> {
+    return this.http.get<{ bookingWindowWeeks: number }>(
+      `${this.baseUrl}/system-config`
+    );
+  }
+
+  updateBookingWindow(weeks: number): Observable<{ bookingWindowWeeks: number }> {
+    return this.http.put<{ bookingWindowWeeks: number }>(
+      `${this.baseUrl}/system-config/booking-window`,
+      { bookingWindowWeeks: weeks }
+    );
+  }
 }

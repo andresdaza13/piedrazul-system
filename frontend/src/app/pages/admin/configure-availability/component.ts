@@ -15,6 +15,8 @@ export class ConfigureAvailabilityComponent implements OnInit {
   loading: boolean = false;
   success: boolean = false;
   errorMessage: string = '';
+  bookingWindowWeeks = 4;
+  windowSuccess = false;
 
   daysOfWeek = [
     { value: 'MONDAY', label: 'Lunes' },
@@ -39,6 +41,19 @@ export class ConfigureAvailabilityComponent implements OnInit {
   ngOnInit() {
     this.availabilityService.getDoctors().subscribe(doctors => {
       this.doctors = doctors;
+    });
+    this.availabilityService.getSystemConfig().subscribe(config => {
+      this.bookingWindowWeeks = config.bookingWindowWeeks;
+    });
+  }
+
+  saveBookingWindow() {
+    this.availabilityService.updateBookingWindow(this.bookingWindowWeeks).subscribe({
+      next: (config) => {
+        this.bookingWindowWeeks = config.bookingWindowWeeks;
+        this.windowSuccess = true;
+      },
+      error: () => this.errorMessage = 'Error al guardar la ventana de agendamiento.'
     });
   }
 
