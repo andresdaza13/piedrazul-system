@@ -145,7 +145,7 @@
           </div>
         </div>
         <div class="mt-4 d-flex gap-2">
-          <button class="btn btn-outline-secondary" (click)="step = 2 ? 1 : 1">Volver</button>
+        <button class="btn btn-outline-secondary" (click)="step = 1">Volver</button>
           <button class="btn btn-primary flex-grow-1" (click)="step = 3"
                   [disabled]="!booking.doctorId || !booking.date || !booking.time">
             Continuar

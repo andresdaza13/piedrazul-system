@@ -71,5 +71,44 @@ public class AppointmentController {
                 "total", appointments.size(),
                 "appointments", appointments
         ));
-    }
+
+            
+    } 
+
+    // ===== STATE PATTERN — Transiciones de estado =====
+
+@PatchMapping("/{id}/confirm")
+@Operation(summary = "Confirmar cita",
+           description = "Transicion: PENDING -> CONFIRMED")
+public ResponseEntity<AppointmentResponseDTO> confirm(@PathVariable Long id) {
+    return ResponseEntity.ok(service.confirmAppointment(id));
+}
+
+@PatchMapping("/{id}/start")
+@Operation(summary = "Iniciar consulta",
+           description = "Transicion: CONFIRMED -> IN_PROGRESS")
+public ResponseEntity<AppointmentResponseDTO> start(@PathVariable Long id) {
+    return ResponseEntity.ok(service.startAppointment(id));
+}
+
+@PatchMapping("/{id}/complete")
+@Operation(summary = "Completar cita",
+           description = "Transicion: IN_PROGRESS -> COMPLETED")
+public ResponseEntity<AppointmentResponseDTO> complete(@PathVariable Long id) {
+    return ResponseEntity.ok(service.completeAppointment(id));
+}
+
+@PatchMapping("/{id}/cancel")
+@Operation(summary = "Cancelar cita",
+           description = "Transicion: PENDING/CONFIRMED/IN_PROGRESS -> CANCELLED")
+public ResponseEntity<AppointmentResponseDTO> cancel(@PathVariable Long id) {
+    return ResponseEntity.ok(service.cancelAppointment(id));
+}
+
+@PatchMapping("/{id}/no-show")
+@Operation(summary = "Marcar paciente no asistio",
+           description = "Transicion: CONFIRMED -> NO_SHOW")
+public ResponseEntity<AppointmentResponseDTO> noShow(@PathVariable Long id) {
+    return ResponseEntity.ok(service.markNoShow(id));
+}
 }

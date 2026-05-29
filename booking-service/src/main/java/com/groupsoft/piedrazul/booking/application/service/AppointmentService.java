@@ -85,4 +85,51 @@ public class AppointmentService {
                 .notes(appointment.getNotes())
                 .build();
     }
+
+    // ===== STATE PATTERN — Transiciones =====
+
+@Transactional
+public AppointmentResponseDTO confirmAppointment(Long id) {
+    Appointment appointment = repository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Cita no encontrada con id: " + id));
+    appointment.confirm();
+    Appointment saved = repository.save(appointment);
+    return toDTO(saved);
+}
+
+@Transactional
+public AppointmentResponseDTO startAppointment(Long id) {
+    Appointment appointment = repository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Cita no encontrada con id: " + id));
+    appointment.start();
+    Appointment saved = repository.save(appointment);
+    return toDTO(saved);
+}
+
+@Transactional
+public AppointmentResponseDTO completeAppointment(Long id) {
+    Appointment appointment = repository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Cita no encontrada con id: " + id));
+    appointment.complete();
+    Appointment saved = repository.save(appointment);
+    return toDTO(saved);
+}
+
+@Transactional
+public AppointmentResponseDTO cancelAppointment(Long id) {
+    Appointment appointment = repository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Cita no encontrada con id: " + id));
+    appointment.cancel();
+    Appointment saved = repository.save(appointment);
+    return toDTO(saved);
+}
+
+@Transactional
+public AppointmentResponseDTO markNoShow(Long id) {
+    Appointment appointment = repository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Cita no encontrada con id: " + id));
+    appointment.markNoShow();
+    Appointment saved = repository.save(appointment);
+    return toDTO(saved);
+}
 }
