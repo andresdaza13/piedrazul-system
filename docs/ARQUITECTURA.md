@@ -107,4 +107,6 @@ Pacientes, agendadores y administradores usan el **Portal Angular**, que consume
 
 ## 9. Repositorio
 
-URL: repositorio Git del equipo (completar con la URL oficial del grupo).
+URL: https://github.com/andresdaza13/piedrazul-system.git
+
+

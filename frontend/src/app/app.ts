@@ -8,8 +8,8 @@ import { NavbarComponent } from './shared/components/navbar/component';
   imports: [RouterOutlet, NavbarComponent],
   template: `
     <app-navbar></app-navbar>
-    <div class="container">
-      <router-outlet></router-outlet>
+    <div class="container pb-4">
+      <router-outlet />
     </div>
   `
 })

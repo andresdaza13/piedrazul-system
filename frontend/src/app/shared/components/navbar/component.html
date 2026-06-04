@@ -1,47 +1,94 @@
-<nav class="navbar navbar-expand-lg sticky-top mb-4"
-     style="background-color: #1E3A8A; box-shadow: 0 2px 12px rgba(15,23,42,0.12);">
-  <div class="container">
-    <a class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold"
-       routerLink="/" style="font-size: 1.35rem;">
-      <span class="d-inline-flex align-items-center justify-content-center rounded-circle"
-            style="width:38px; height:38px; background-color:#14B8A6;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white"
-             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-        </svg>
-      </span>
-      Piedrazul
-    </a>
+@if (showNavbar) {
+  <nav
+    class="navbar navbar-expand-lg sticky-top mb-4"
+    style="background-color: #1e3a8a; box-shadow: 0 2px 12px rgba(15, 23, 42, 0.12);"
+  >
+    <div class="container">
+      <a
+        class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold"
+        [routerLink]="session?.homeRoute"
+        style="font-size: 1.35rem;"
+      >
+        <span
+          class="d-inline-flex align-items-center justify-content-center rounded-circle"
+          style="width: 38px; height: 38px; background-color: #14b8a6;"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+          </svg>
+        </span>
+        Piedrazul
+      </a>
 
-    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navMenu" aria-label="Abrir menu">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+      <button
+        class="navbar-toggler border-0"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navMenu"
+        aria-label="Abrir menu"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <div class="collapse navbar-collapse" id="navMenu">
-      <ul class="navbar-nav ms-auto gap-lg-1">
-        <li class="nav-item">
-          <a class="nav-link px-3 rounded text-white-50 fw-semibold"
-             routerLink="/paciente" routerLinkActive="active-link">
-            Portal Paciente
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link px-3 rounded text-white-50 fw-semibold"
-             routerLink="/agendador" routerLinkActive="active-link">
-            Agendador
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link px-3 rounded text-white-50 fw-semibold"
-             routerLink="/admin" routerLinkActive="active-link">
-            Administracion
-          </a>
-        </li>
-      </ul>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto gap-lg-1 align-items-lg-center">
+          @if (session?.role === 'PATIENT') {
+            <li class="nav-item">
+              <a
+                class="nav-link px-3 rounded text-white-50 fw-semibold"
+                routerLink="/paciente"
+                routerLinkActive="active-link"
+              >
+                Mis citas
+              </a>
+            </li>
+          }
+          @if (session?.role === 'SCHEDULER' || session?.role === 'DOCTOR') {
+            <li class="nav-item">
+              <a
+                class="nav-link px-3 rounded text-white-50 fw-semibold"
+                routerLink="/agendador"
+                routerLinkActive="active-link"
+              >
+                Agenda
+              </a>
+            </li>
+          }
+          @if (session?.role === 'ADMINISTRATOR') {
+            <li class="nav-item">
+              <a
+                class="nav-link px-3 rounded text-white-50 fw-semibold"
+                routerLink="/admin"
+                routerLinkActive="active-link"
+              >
+                Administracion
+              </a>
+            </li>
+          }
+          <li class="nav-item ms-lg-2">
+            <span class="badge rounded-pill text-bg-light">
+              {{ session?.fullName }} · {{ roleLabel(session?.role ?? '') }}
+            </span>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-sm btn-outline-light ms-lg-2" type="button" (click)="logout()">
+              Salir
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
+}
 
 <style>
   .nav-link.active-link,
