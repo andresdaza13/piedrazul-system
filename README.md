@@ -47,3 +47,14 @@ cd frontend && npm install && npm start
 ```
 
 Portal: http://localhost:4200
+
+## Usuarios de demostracion (login)
+
+| Usuario | Contraseña | Rol | Pantalla |
+|---------|------------|-----|----------|
+| admin | admin123 | Administrador | /admin |
+| agendador | agendador123 | Agendador | /agendador |
+| medico | medico123 | Medico | /agendador |
+| paciente | paciente123 | Paciente | /paciente |
+
+Se crean automaticamente al iniciar `user-service` si no existen en la BD.

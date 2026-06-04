@@ -1,7 +1,10 @@
 package com.groupsoft.piedrazul.user.infrastructure.controller;
 
+import com.groupsoft.piedrazul.user.application.dto.LoginRequestDTO;
+import com.groupsoft.piedrazul.user.application.dto.LoginResponseDTO;
 import com.groupsoft.piedrazul.user.application.dto.UserResponseDTO;
 import com.groupsoft.piedrazul.user.application.dto.UserWhatsAppDTO;
+import com.groupsoft.piedrazul.user.application.service.AuthService;
 import com.groupsoft.piedrazul.user.application.service.UserService;
 import com.groupsoft.piedrazul.user.domain.model.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +24,14 @@ import java.util.Map;
 public class UserController {
 
     private final UserService service;
+    private final AuthService authService;
+
+    @PostMapping("/login")
+    @Operation(summary = "Inicio de sesion",
+               description = "Autentica usuario por rol y retorna ruta de inicio del portal")
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
 
     @PostMapping("/whatsapp-contact")
     @Operation(summary = "Registrar paciente desde WhatsApp",

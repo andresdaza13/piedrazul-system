@@ -1,0 +1,49 @@
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow border-0">
+      <div class="card-body p-4">
+        <h2 class="h4 text-center mb-1" style="color: #1E3A8A;">Piedrazul</h2>
+        <p class="text-center text-muted small mb-4">Sistema de Reserva de Citas</p>
+
+        <form (ngSubmit)="submit()">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Usuario</label>
+            <input class="form-control" [(ngModel)]="username" name="username" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Contraseña</label>
+            <input
+              type="password"
+              class="form-control"
+              [(ngModel)]="password"
+              name="password"
+              required
+            />
+          </div>
+
+          @if (error) {
+            <div class="alert alert-danger py-2 small">{{ error }}</div>
+          }
+
+          <button class="btn btn-primary w-100" type="submit" [disabled]="loading">
+            {{ loading ? 'Ingresando...' : 'Iniciar sesion' }}
+          </button>
+        </form>
+
+        <hr class="my-4" />
+        <p class="small text-muted mb-2">Usuarios de demostracion:</p>
+        <div class="d-flex flex-wrap gap-2">
+          @for (demo of demoUsers; track demo.user) {
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              (click)="fillDemo(demo.user, demo.pass)"
+            >
+              {{ demo.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
