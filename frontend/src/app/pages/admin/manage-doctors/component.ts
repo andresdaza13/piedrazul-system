@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { AvailabilityService, DoctorDTO } from '../../../core/services/availability/service';
 
 @Component({
@@ -28,8 +29,13 @@ export class ManageDoctorsComponent implements OnInit {
   }
 
   loadDoctors() {
-    this.availabilityService.getDoctors().subscribe(doctors => {
-      this.doctors = doctors;
+    this.availabilityService.getDoctors().subscribe({
+      next: (doctors) => {
+        this.doctors = doctors;
+      },
+      error: () => {
+        this.errorMessage = 'No se pudo cargar la lista de medicos. Verifique que availability-service este activo.';
+      }
     });
   }
 
@@ -37,16 +43,17 @@ export class ManageDoctorsComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
     this.success = false;
-    this.availabilityService.createDoctor(this.newDoctor).subscribe({
+
+    this.availabilityService.createDoctor(this.newDoctor).pipe(
+      finalize(() => { this.loading = false; })
+    ).subscribe({
       next: () => {
         this.success = true;
-        this.loading = false;
         this.newDoctor = { fullName: '', specialty: '' };
         this.loadDoctors();
       },
       error: () => {
         this.errorMessage = 'Error al crear el medico.';
-        this.loading = false;
       }
     });
   }

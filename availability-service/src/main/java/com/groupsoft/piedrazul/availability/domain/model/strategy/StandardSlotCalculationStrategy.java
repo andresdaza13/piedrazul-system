@@ -9,30 +9,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class StandardSlotCalculationStrategy implements SlotCalculationStrategy {
+public class StandardSlotCalculationStrategy extends AbstractSlotCalculationStrategy {
 
     @Override
-    public List<LocalTime> calculateAvailableSlots(Availability schedule, LocalDate targetDate) {
+    protected List<LocalTime> generateTimeSlots(Availability schedule, LocalDate targetDate) {
         List<LocalTime> slots = new ArrayList<>();
-        
-        if (!targetDate.getDayOfWeek().equals(schedule.getDayOfWeek()) || !schedule.isActive()) {
-            return slots; 
-        }
-
         LocalTime currentSlot = schedule.getStartTime();
-        
-        while (currentSlot.plusMinutes(schedule.getIntervalMinutes()).isBefore(schedule.getEndTime()) 
+
+        while (currentSlot.plusMinutes(schedule.getIntervalMinutes()).isBefore(schedule.getEndTime())
                 || currentSlot.plusMinutes(schedule.getIntervalMinutes()).equals(schedule.getEndTime())) {
-            
             slots.add(currentSlot);
             currentSlot = currentSlot.plusMinutes(schedule.getIntervalMinutes());
         }
-
         return slots;
     }
 
     @Override
     public boolean supports(Availability schedule) {
-        return true; 
+        return true;
     }
 }

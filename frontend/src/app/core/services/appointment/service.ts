@@ -21,11 +21,19 @@ export interface WebBookingRequestDTO {
 export interface AppointmentResponseDTO {
   id: number;
   patientId: number;
+  patientName?: string;
+  patientDocument?: string;
   doctorId: number;
   appointmentDate: string;
   status: string;
   whatsappNumber: string;
   notes: string;
+}
+
+export interface RescheduleRequestDTO {
+  newAppointmentDate: string;
+  responsibleUserId: number;
+  responsibleName: string;
 }
 
 @Injectable({
@@ -49,6 +57,26 @@ export class AppointmentService {
   getAppointmentsByDoctorAndDate(doctorId: number, date: string): Observable<any> {
     return this.http.get(
       `${this.baseUrl}/appointments/doctor/${doctorId}?date=${date}`
+    );
+  }
+
+  exportCsv(doctorId: number, date: string): Observable<Blob> {
+    return this.http.get(
+      `${this.baseUrl}/appointments/doctor/${doctorId}/export?date=${date}`,
+      { responseType: 'blob' }
+    );
+  }
+
+  reschedule(appointmentId: number, request: RescheduleRequestDTO): Observable<AppointmentResponseDTO> {
+    return this.http.put<AppointmentResponseDTO>(
+      `${this.baseUrl}/appointments/${appointmentId}/reschedule`,
+      request
+    );
+  }
+
+  getRescheduleHistory(appointmentId: number): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.baseUrl}/appointments/${appointmentId}/reschedule-history`
     );
   }
 }

@@ -3,6 +3,8 @@ package com.groupsoft.piedrazul.booking.application.service;
 import com.groupsoft.piedrazul.booking.application.dto.AppointmentRequestDTO;
 import com.groupsoft.piedrazul.booking.application.dto.AppointmentResponseDTO;
 import com.groupsoft.piedrazul.booking.domain.Repository.AppointmentRepository;
+import com.groupsoft.piedrazul.booking.application.mapper.AppointmentMapper;
+import com.groupsoft.piedrazul.booking.domain.Repository.AppointmentRescheduleHistoryRepository;
 import com.groupsoft.piedrazul.booking.domain.exception.AppointmentOverlapException;
 import com.groupsoft.piedrazul.booking.domain.model.Appointment;
 import com.groupsoft.piedrazul.booking.domain.model.AppointmentStatus;
@@ -31,6 +33,12 @@ class AppointmentServiceTest {
 
     @Mock
     private AppointmentEventPublisher eventPublisher;
+
+    @Mock
+    private AppointmentRescheduleHistoryRepository historyRepository;
+
+    @Mock
+    private AppointmentMapper appointmentMapper;
 
     @InjectMocks
     private AppointmentService appointmentService;
@@ -70,6 +78,13 @@ class AppointmentServiceTest {
 
         when(repository.save(any(Appointment.class)))
                 .thenReturn(appointment);
+
+        when(appointmentMapper.toDTO(any(Appointment.class)))
+                .thenReturn(AppointmentResponseDTO.builder()
+                        .id(100L)
+                        .status(AppointmentStatus.PENDING)
+                        .patientId(1L)
+                        .build());
 
         AppointmentResponseDTO response =
                 appointmentService.createAppointment(requestDTO);
@@ -111,6 +126,9 @@ class AppointmentServiceTest {
                 any(LocalDateTime.class),
                 any(LocalDateTime.class)
         )).thenReturn(List.of(appointment));
+
+        when(appointmentMapper.toDTO(appointment))
+                .thenReturn(AppointmentResponseDTO.builder().patientId(1L).build());
 
         List<AppointmentResponseDTO> result =
                 appointmentService.getAppointmentsByDoctorAndDate(10L, date);

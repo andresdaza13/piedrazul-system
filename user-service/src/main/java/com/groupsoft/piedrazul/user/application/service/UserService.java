@@ -20,30 +20,32 @@ public class UserService {
 
     @Transactional
     public User registerOrGetUserFromWhatsApp(UserWhatsAppDTO request) {
-        
-        // Estrategia Find-or-Create: Buscamos al paciente por documento o celular
-        User user = repository.findByDocumentNumber(request.getDocumentNumber())
-                .orElseGet(() -> repository.findByPhone(request.getPhone())
-                .orElseGet(() -> {
-                    
-                    // Invocamos el patrón Factory Method
-                    User newUser = User.createPatientFromWhatsApp(
-                            request.getDocumentNumber(),
-                            request.getFirstName(),
-                            request.getLastName(),
-                            request.getPhone(),
-                            request.getGender(),
-                            request.getBirthDate(),
-                            request.getEmail()
-                    );
-                    
-                    return repository.save(newUser);
-                }));
-
-        // PATRÓN OBSERVER: Emitimos el evento asíncrono
-        // Enviamos el request original a la cola para que el booking-service lo capture y cree la cita
+        User user = findOrCreatePatient(request);
         rabbitTemplate.convertAndSend(RabbitMQConfig.WHATSAPP_QUEUE, request);
-
         return user;
+    }
+
+    @Transactional
+    public User registerWebPatient(UserWhatsAppDTO request) {
+        return findOrCreatePatient(request);
+    }
+
+    public User getUserById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    private User findOrCreatePatient(UserWhatsAppDTO request) {
+        return repository.findByDocumentNumber(request.getDocumentNumber())
+                .orElseGet(() -> repository.findByPhone(request.getPhone())
+                .orElseGet(() -> repository.save(User.createPatientFromWhatsApp(
+                        request.getDocumentNumber(),
+                        request.getFirstName(),
+                        request.getLastName(),
+                        request.getPhone(),
+                        request.getGender(),
+                        request.getBirthDate(),
+                        request.getEmail()
+                ))));
     }
 }

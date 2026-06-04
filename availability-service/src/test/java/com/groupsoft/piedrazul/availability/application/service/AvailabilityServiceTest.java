@@ -7,6 +7,7 @@ import com.groupsoft.piedrazul.availability.domain.model.Doctor;
 import com.groupsoft.piedrazul.availability.domain.model.strategy.SlotCalculationStrategy;
 import com.groupsoft.piedrazul.availability.domain.repository.AvailabilityRepository;
 import com.groupsoft.piedrazul.availability.domain.repository.DoctorRepository;
+import com.groupsoft.piedrazul.availability.infrastructure.adapter.BookingClientAdapter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -29,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class AvailabilityServiceTest {
 
     @Mock
@@ -39,6 +43,12 @@ class AvailabilityServiceTest {
 
     @Mock
     private SlotCalculationStrategy strategy;
+
+    @Mock
+    private SystemConfigService systemConfigService;
+
+    @Mock
+    private BookingClientAdapter bookingClientAdapter;
 
     private AvailabilityService availabilityService;
 
@@ -52,7 +62,13 @@ class AvailabilityServiceTest {
         availabilityService = new AvailabilityService(
                 availabilityRepository,
                 doctorRepository,
+                systemConfigService,
+                bookingClientAdapter,
                 List.of(strategy));
+
+        when(systemConfigService.getBookingWindowWeeks()).thenReturn(4);
+        when(bookingClientAdapter.getOccupiedSlots(anyLong(), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
 
         doctor = Doctor.builder()
                 .id(1L)
@@ -120,12 +136,13 @@ class AvailabilityServiceTest {
     @Test
     void shouldReturnAvailableSlotsSuccessfully() {
 
-        LocalDate targetDate = LocalDate.of(2026,5,25);
+        LocalDate targetDate = LocalDate.now().plusDays(1);
+        availability.setDayOfWeek(targetDate.getDayOfWeek());
 
         when(availabilityRepository
                 .findByDoctorIdAndDayOfWeekAndActiveTrue(
                         1L,
-                        DayOfWeek.MONDAY
+                        targetDate.getDayOfWeek()
                 ))
                 .thenReturn(Optional.of(availability));
 
@@ -149,12 +166,12 @@ class AvailabilityServiceTest {
     @Test
     void shouldReturnEmptyListWhenDoctorDoesNotWorkThatDay() {
 
-        LocalDate targetDate = LocalDate.of(2026,5,25);
+        LocalDate targetDate = LocalDate.now().plusDays(1);
 
         when(availabilityRepository
                 .findByDoctorIdAndDayOfWeekAndActiveTrue(
                         1L,
-                        DayOfWeek.MONDAY
+                        targetDate.getDayOfWeek()
                 ))
                 .thenReturn(Optional.empty());
 
@@ -168,12 +185,13 @@ class AvailabilityServiceTest {
     @Test
     void shouldThrowExceptionWhenNoStrategySupportsAvailability() {
 
-        LocalDate targetDate = LocalDate.of(2026,5,25);
+        LocalDate targetDate = LocalDate.now().plusDays(1);
+        availability.setDayOfWeek(targetDate.getDayOfWeek());
 
         when(availabilityRepository
                 .findByDoctorIdAndDayOfWeekAndActiveTrue(
                         1L,
-                        DayOfWeek.MONDAY
+                        targetDate.getDayOfWeek()
                 ))
                 .thenReturn(Optional.of(availability));
 
@@ -195,7 +213,7 @@ class AvailabilityServiceTest {
     @Test
     void shouldUseCorrectStrategyToCalculateSlots() {
 
-        LocalDate targetDate = LocalDate.of(2026,5,25);
+        LocalDate targetDate = LocalDate.now().plusDays(1);
 
         when(availabilityRepository
                 .findByDoctorIdAndDayOfWeekAndActiveTrue(

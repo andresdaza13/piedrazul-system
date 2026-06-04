@@ -1,9 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { AvailabilityService, DoctorDTO } from '../../../core/services/availability/service';
 import { AppointmentService } from '../../../core/services/appointment/service';
 import { UserService } from '../../../core/services/user/service';
+import { buildBookingWindow } from '../../../core/utils/booking-window';
 
 @Component({
   selector: 'app-book-appointment',
@@ -19,6 +21,8 @@ export class BookAppointmentComponent implements OnInit {
   success: boolean = false;
   errorMessage: string = '';
   patientId: number | null = null;
+  minDate = '';
+  maxDate = '';
 
   patient = {
     documentNumber: '', firstName: '', lastName: '',
@@ -34,31 +38,32 @@ export class BookAppointmentComponent implements OnInit {
   constructor(
     private availabilityService: AvailabilityService,
     private appointmentService: AppointmentService,
-    private userService: UserService,
-    private cdr: ChangeDetectorRef
+    private userService: UserService
   ) {}
 
   ngOnInit() {
     this.availabilityService.getDoctors().subscribe(doctors => {
       this.doctors = doctors;
-      this.cdr.detectChanges();
+    });
+    this.availabilityService.getSystemConfig().subscribe(config => {
+      const window = buildBookingWindow(config.bookingWindowWeeks);
+      this.minDate = window.minDate;
+      this.maxDate = window.maxDate;
     });
   }
 
   registerPatient() {
     this.loading = true;
     this.errorMessage = '';
-    this.userService.registerFromWhatsApp(this.patient).subscribe({
+    this.userService.registerWebPatient(this.patient).pipe(
+      finalize(() => { this.loading = false; })
+    ).subscribe({
       next: (response) => {
         this.patientId = response.patientId;
         this.step = 2;
-        this.loading = false;
-        this.cdr.detectChanges();
       },
-      error: () => {
-        this.errorMessage = 'Error al registrar el paciente.';
-        this.loading = false;
-        this.cdr.detectChanges();
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al registrar el paciente.';
       }
     });
   }
@@ -71,7 +76,6 @@ export class BookAppointmentComponent implements OnInit {
       ).subscribe(slots => {
         this.availableSlots = slots;
         this.booking.time = '';
-        this.cdr.detectChanges();
       });
     }
   }
@@ -85,18 +89,13 @@ export class BookAppointmentComponent implements OnInit {
       appointmentDate: this.booking.date,
       appointmentTime: this.booking.time,
       notes: 'Cita agendada desde portal web'
-    }).subscribe({
-      next: () => {
-        this.success = true;
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.errorMessage = err.error?.error || 'Error al agendar la cita.';
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
-    });
+    }).pipe(finalize(() => { this.loading = false; }))
+      .subscribe({
+        next: () => { this.success = true; },
+        error: (err) => {
+          this.errorMessage = err.error?.message || err.error?.error || 'Error al agendar la cita.';
+        }
+      });
   }
 
   reset() {
@@ -110,7 +109,6 @@ export class BookAppointmentComponent implements OnInit {
     };
     this.booking = { doctorId: null, date: '', time: '' };
     this.availableSlots = [];
-    this.cdr.detectChanges();
   }
 
   getDoctorName(): string {

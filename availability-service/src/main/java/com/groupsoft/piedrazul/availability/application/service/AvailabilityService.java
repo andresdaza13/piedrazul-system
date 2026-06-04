@@ -7,6 +7,7 @@ import com.groupsoft.piedrazul.availability.domain.model.Doctor;
 import com.groupsoft.piedrazul.availability.domain.repository.AvailabilityRepository;
 import com.groupsoft.piedrazul.availability.domain.repository.DoctorRepository;
 import com.groupsoft.piedrazul.availability.domain.model.strategy.SlotCalculationStrategy;
+import com.groupsoft.piedrazul.availability.infrastructure.adapter.BookingClientAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,8 @@ public class AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
     private final DoctorRepository doctorRepository;
+    private final SystemConfigService systemConfigService;
+    private final BookingClientAdapter bookingClientAdapter;
 
     // PATRON STRATEGY
     // Spring inyecta automaticamente TODAS las clases que implementen SlotCalculationStrategy
@@ -56,22 +60,32 @@ public class AvailabilityService {
 
     @Transactional(readOnly = true)
     public List<LocalTime> getAvailableSlots(Long doctorId, LocalDate targetDate) {
+        validateDateWithinBookingWindow(targetDate);
 
-        // 1. Buscamos si el medico trabaja ese dia de la semana
-        return availabilityRepository.findByDoctorIdAndDayOfWeekAndActiveTrue(
-                doctorId, targetDate.getDayOfWeek())
+        List<LocalTime> calculatedSlots = availabilityRepository
+                .findByDoctorIdAndDayOfWeekAndActiveTrue(doctorId, targetDate.getDayOfWeek())
                 .map(availability -> {
-                    // 2. Buscamos la estrategia correcta
                     SlotCalculationStrategy selectedStrategy = strategies.stream()
                             .filter(strategy -> strategy.supports(availability))
                             .findFirst()
                             .orElseThrow(() -> new RuntimeException(
                                 "No hay estrategia de calculo para esta configuracion"));
-
-                    // 3. Ejecutamos el algoritmo
                     return selectedStrategy.calculateAvailableSlots(availability, targetDate);
                 })
-                // Si no trabaja ese dia, retornamos lista vacia
                 .orElse(Collections.emptyList());
+
+        List<LocalTime> occupied = bookingClientAdapter.getOccupiedSlots(doctorId, targetDate);
+        return calculatedSlots.stream()
+                .filter(slot -> !occupied.contains(slot))
+                .collect(Collectors.toList());
+    }
+
+    private void validateDateWithinBookingWindow(LocalDate targetDate) {
+        LocalDate today = LocalDate.now();
+        LocalDate maxDate = today.plusWeeks(systemConfigService.getBookingWindowWeeks());
+        if (targetDate.isBefore(today) || targetDate.isAfter(maxDate)) {
+            throw new IllegalArgumentException(
+                    "La fecha debe estar dentro de la ventana de agendamiento configurada.");
+        }
     }
 }

@@ -22,7 +22,8 @@
       </div>
       <div class="col-md-4">
         <label class="form-label">Fecha</label>
-        <input type="date" class="form-control" [(ngModel)]="selectedDate">
+        <input type="date" class="form-control" [(ngModel)]="selectedDate"
+               [min]="minDate" [max]="maxDate">
       </div>
       <div class="col-md-3">
         <button class="btn btn-primary w-100" (click)="search()"
@@ -41,17 +42,18 @@
 
 <div *ngIf="searched && !loading">
   <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+    <div class="card-header d-flex justify-content-between align-items-center bg-white flex-wrap gap-2">
       <h5 class="mb-0">Resultados</h5>
-      <span class="badge bg-primary fs-6 px-3 py-2">Total: {{ total }} citas</span>
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-primary fs-6 px-3 py-2">Total: {{ total }} citas</span>
+        <button class="btn btn-outline-success btn-sm" (click)="exportCsv()"
+                [disabled]="appointments.length === 0">
+          Exportar CSV
+        </button>
+      </div>
     </div>
     <div class="card-body p-0">
       <div *ngIf="appointments.length === 0" class="text-center py-5 text-secondary">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1"
-             stroke-width="1.5" class="mb-2">
-          <rect x="3" y="4" width="18" height="18" rx="2"/>
-          <path d="M16 2v4M8 2v4M3 10h18"/>
-        </svg>
         <p class="mb-0">No hay citas para esta fecha</p>
       </div>
       <div class="table-responsive" *ngIf="appointments.length > 0">
@@ -60,32 +62,83 @@
             <tr>
               <th>#</th>
               <th>Fecha y Hora</th>
-              <th>ID Paciente</th>
+              <th>Paciente</th>
+              <th>Documento</th>
               <th>WhatsApp</th>
               <th>Estado</th>
-              <th>Notas</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let apt of appointments; let i = index">
               <td class="text-secondary">{{ i + 1 }}</td>
               <td class="fw-semibold">{{ apt.appointmentDate | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>{{ apt.patientId }}</td>
+              <td>{{ apt.patientName || ('ID ' + apt.patientId) }}</td>
+              <td>{{ apt.patientDocument || '—' }}</td>
               <td>{{ apt.whatsappNumber }}</td>
               <td>
-                <span class="badge"
-                  [class.bg-success]="apt.status === 'SCHEDULED'"
-                  [class.bg-warning]="apt.status === 'PENDING'"
-                  [class.text-dark]="apt.status === 'PENDING'"
-                  [class.bg-danger]="apt.status === 'CANCELLED'"
-                  [class.bg-secondary]="apt.status === 'COMPLETED'">
-                  {{ apt.status }}
-                </span>
+                <span class="badge bg-secondary">{{ apt.status }}</span>
               </td>
-              <td class="text-secondary">{{ apt.notes || '—' }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary" (click)="openReschedule(apt)">
+                  Re-agendar
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade show d-block" tabindex="-1"
+     *ngIf="showRescheduleModal" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Re-agendar cita #{{ selectedAppointment?.id }}</h5>
+        <button type="button" class="btn-close" (click)="closeRescheduleModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger py-2" *ngIf="rescheduleError">{{ rescheduleError }}</div>
+        <div class="mb-3">
+          <label class="form-label">Nueva fecha</label>
+          <input type="date" class="form-control" [(ngModel)]="rescheduleDate"
+                 [min]="minDate" [max]="maxDate" (change)="loadRescheduleSlots()">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Franja disponible *</label>
+          <select class="form-select" [(ngModel)]="rescheduleTime"
+                  [disabled]="rescheduleSlots.length === 0">
+            <option value="">
+              {{ rescheduleSlots.length === 0 ? 'Sin franjas para esta fecha' : 'Seleccione hora' }}
+            </option>
+            <option *ngFor="let slot of rescheduleSlots" [value]="slot">{{ slot }}</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Responsable del cambio</label>
+          <input type="text" class="form-control" [(ngModel)]="responsibleName"
+                 placeholder="Nombre del medico o agendador">
+        </div>
+        <div *ngIf="rescheduleHistory.length > 0">
+          <h6>Historial de cambios</h6>
+          <ul class="list-group list-group-flush small">
+            <li class="list-group-item" *ngFor="let h of rescheduleHistory">
+              {{ h.previousDate | date:'dd/MM/yyyy HH:mm' }}
+              → {{ h.newDate | date:'dd/MM/yyyy HH:mm' }}
+              por {{ h.responsibleName }}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeRescheduleModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmReschedule()"
+                [disabled]="rescheduleLoading">
+          {{ rescheduleLoading ? 'Guardando...' : 'Confirmar' }}
+        </button>
       </div>
     </div>
   </div>

@@ -87,6 +87,7 @@
           <label class="form-label fw-bold">Fecha *</label>
           <input type="date" class="form-control"
                  [(ngModel)]="appointment.date"
+                 [min]="minDate" [max]="maxDate"
                  (change)="onDoctorOrDateChange()">
         </div>
         <div class="col-md-4">
