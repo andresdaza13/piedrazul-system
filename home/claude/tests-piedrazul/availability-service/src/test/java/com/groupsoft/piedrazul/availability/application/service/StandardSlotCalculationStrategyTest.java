@@ -1,8 +1,14 @@
-package com.groupsoft.piedrazul.availability.application.service;
+package com.groupsoft.piedrazul.availability.application.service; 
+// Paquete de pruebas dentro de la capa de aplicación del bounded context Disponibilidad
 
-import com.groupsoft.piedrazul.availability.domain.model.Availability;
+// Entidad Availability
+import com.groupsoft.piedrazul.availability.domain.model.Availability; 
+
+// Entidad Doctor
 import com.groupsoft.piedrazul.availability.domain.model.Doctor;
-import com.groupsoft.piedrazul.availability.domain.model.strategy.StandardSlotCalculationStrategy;
+
+// Estrategia a probar
+import com.groupsoft.piedrazul.availability.domain.model.strategy.StandardSlotCalculationStrategy; 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,12 +25,15 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class StandardSlotCalculationStrategyTest {
 
-    private StandardSlotCalculationStrategy strategy;
-    private Doctor doctor;
+    private StandardSlotCalculationStrategy strategy; // Estrategia bajo prueba (SUT)
+    private Doctor doctor; // Entidad Doctor usada en las pruebas
 
     @BeforeEach
     void setUp() {
+        // Inicializa la estrategia estándar
         strategy = new StandardSlotCalculationStrategy();
+
+        // Crea un doctor de prueba
         doctor = Doctor.builder()
                 .fullName("Dr. Prueba")
                 .specialty("General")
@@ -32,6 +41,7 @@ class StandardSlotCalculationStrategyTest {
                 .build();
     }
 
+    // Método auxiliar para construir Availability con parámetros dinámicos
     private Availability buildAvailability(DayOfWeek day, LocalTime start,
                                            LocalTime end, int interval, boolean active) {
         return Availability.builder()
@@ -54,7 +64,7 @@ class StandardSlotCalculationStrategyTest {
         Availability av = buildAvailability(
                 DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(12, 0), 30, true);
 
-        // Buscamos un lunes próximo real
+        // Fecha: próximo lunes
         LocalDate nextMonday = LocalDate.now().with(java.time.temporal.TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
         List<LocalTime> slots = strategy.calculateAvailableSlots(av, nextMonday);
 
