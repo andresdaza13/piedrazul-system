@@ -1,8 +1,14 @@
 package com.groupsoft.piedrazul.user.domain.model;
+// Paquete de pruebas unitarias para la entidad User en el dominio User
 
-import org.junit.jupiter.api.Test;
-import java.time.LocalDate;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test; 
+// Anotación de JUnit 5 para definir métodos de prueba
+
+import java.time.LocalDate; 
+// Clase estándar de Java para manejar fechas
+
+import static org.junit.jupiter.api.Assertions.*; 
+// Métodos de aserción de JUnit (assertEquals, assertTrue, assertNotNull, etc.)
 
 /**
  * Pruebas unitarias para la entidad User.
@@ -12,7 +18,7 @@ class UserTest {
 
     @Test
     void shouldCreatePatientFromWhatsAppWithCorrectDefaultValues() {
-        // Arrange
+        // Arrange - datos de entrada simulados
         String document  = "1061234567";
         String firstName = "Carlos Andres";
         String lastName  = "Caicedo Daza";
@@ -21,11 +27,11 @@ class UserTest {
         LocalDate birthDate = LocalDate.of(1998, 5, 10);
         String email     = "carlos@test.com";
 
-        // Act
+        // Act - creación de usuario mediante Factory Method
         User user = User.createPatientFromWhatsApp(
                 document, firstName, lastName, phone, gender, birthDate, email);
 
-        // Assert
+        // Assert - validaciones de valores por defecto y concatenación de nombre
         assertEquals("Carlos Andres Caicedo Daza", user.getFullName(),
                 "El nombre completo debe concatenarse correctamente");
         assertEquals(document, user.getDocumentNumber());
@@ -58,7 +64,7 @@ class UserTest {
                 "888", "Luis", "Gómez",
                 "3009999999", Gender.HOMBRE, null, null);
 
-        // Assert - no debe lanzar excepción
+        // Assert - no debe lanzar excepción y contraseña debe existir
         assertNull(user.getBirthDate());
         assertNull(user.getEmail());
         assertNotNull(user.getPassword());
@@ -66,7 +72,7 @@ class UserTest {
 
     @Test
     void shouldGenerateUniquePasswordsForDifferentPatients() {
-        // Arrange
+        // Arrange - creación de dos usuarios distintos
         User user1 = User.createPatientFromWhatsApp(
                 "111", "A", "B", "300", Gender.HOMBRE, null, null);
         User user2 = User.createPatientFromWhatsApp(
@@ -79,11 +85,11 @@ class UserTest {
 
     @Test
     void shouldSetRolePatientNeverAdmin() {
-        // Arrange & Act
+        // Arrange & Act - creación de usuario como paciente
         User user = User.createPatientFromWhatsApp(
                 "333", "Test", "User", "302", Gender.OTRO, null, null);
 
-        // Assert - nunca puede ser ADMINISTRATOR ni DOCTOR
+        // Assert - nunca puede ser ADMINISTRATOR ni DOCTOR ni SCHEDULER
         assertNotEquals(Role.ADMINISTRATOR, user.getRole());
         assertNotEquals(Role.DOCTOR, user.getRole());
         assertNotEquals(Role.SCHEDULER, user.getRole());
@@ -103,6 +109,7 @@ class UserTest {
                 .active(true)
                 .build();
 
+        // Assert - validación de campos creados con el builder
         assertEquals("scheduler1", user.getUsername());
         assertEquals(Role.SCHEDULER, user.getRole());
         assertTrue(user.isActive());
