@@ -1,3 +1,4 @@
+// Paquete de pruebas unitarias para las entidades del dominio Disponibilidad
 package com.groupsoft.piedrazul.availability.domain.model;
 
 import org.junit.jupiter.api.Test;
@@ -17,12 +18,14 @@ class DoctorAndAvailabilityTest {
 
     @Test
     void doctorBuilderShouldCreateActiveDoctor() {
+         // Construcción de un doctor activo con nombre y especialidad
         Doctor doctor = Doctor.builder()
                 .fullName("Dr. Martínez")
                 .specialty("Fisioterapia")
                 .active(true)
                 .build();
 
+        // Validaciones
         assertEquals("Dr. Martínez", doctor.getFullName());
         assertEquals("Fisioterapia", doctor.getSpecialty());
         assertTrue(doctor.isActive());
@@ -30,14 +33,17 @@ class DoctorAndAvailabilityTest {
 
     @Test
     void doctorShouldAllowDeactivation() {
+        // Construcción de un doctor inicialmente activo
         Doctor doctor = Doctor.builder()
                 .fullName("Dr. García")
                 .specialty("Medicina General")
                 .active(true)
                 .build();
 
+        // Cambio de estado a inactivo
         doctor.setActive(false);
 
+        // Validación
         assertFalse(doctor.isActive());
     }
 
@@ -49,6 +55,7 @@ class DoctorAndAvailabilityTest {
                 .active(true)
                 .build();
 
+        // Validaciones
         assertNotNull(doctor);
         assertNull(doctor.getSpecialty());
         assertTrue(doctor.isActive());
@@ -60,12 +67,14 @@ class DoctorAndAvailabilityTest {
 
     @Test
     void availabilityBuilderShouldSetAllFields() {
+        // Construcción de un doctor
         Doctor doctor = Doctor.builder()
                 .fullName("Dr. López")
                 .specialty("Terapia")
                 .active(true)
                 .build();
 
+        // Construcción de disponibilidad con todos los campos
         Availability availability = Availability.builder()
                 .doctor(doctor)
                 .dayOfWeek(DayOfWeek.MONDAY)
@@ -75,6 +84,7 @@ class DoctorAndAvailabilityTest {
                 .active(true)
                 .build();
 
+        // Validaciones
         assertEquals(DayOfWeek.MONDAY, availability.getDayOfWeek());
         assertEquals(LocalTime.of(8, 0), availability.getStartTime());
         assertEquals(LocalTime.of(12, 0), availability.getEndTime());
@@ -88,12 +98,14 @@ class DoctorAndAvailabilityTest {
         LocalTime start = LocalTime.of(8, 0);
         LocalTime end   = LocalTime.of(17, 0);
 
+        // Validación de regla de negocio: hora inicio < hora fin
         assertTrue(start.isBefore(end),
                 "La hora de inicio debe ser anterior a la hora de fin");
     }
 
     @Test
     void availabilityShouldAllowToggleActive() {
+        // Construcción de disponibilidad activa
         Availability av = Availability.builder()
                 .doctor(Doctor.builder().fullName("X").active(true).build())
                 .dayOfWeek(DayOfWeek.FRIDAY)
@@ -103,13 +115,16 @@ class DoctorAndAvailabilityTest {
                 .active(true)
                 .build();
 
+        // Cambio de estado a inactivo
         av.setActive(false);
+
+        // Validación
         assertFalse(av.isActive());
     }
 
     @Test
     void availabilityShouldSupportDifferentIntervals() {
-        // 20 min
+        // Disponibilidad con intervalo de 20 min
         Availability av20 = Availability.builder()
                 .doctor(Doctor.builder().fullName("A").active(true).build())
                 .dayOfWeek(DayOfWeek.TUESDAY)
@@ -119,7 +134,7 @@ class DoctorAndAvailabilityTest {
                 .active(true)
                 .build();
 
-        // 60 min
+        // Disponibilidad con intervalo de 60 min
         Availability av60 = Availability.builder()
                 .doctor(Doctor.builder().fullName("B").active(true).build())
                 .dayOfWeek(DayOfWeek.WEDNESDAY)
@@ -129,6 +144,7 @@ class DoctorAndAvailabilityTest {
                 .active(true)
                 .build();
 
+        // Validaciones
         assertEquals(20, av20.getIntervalMinutes());
         assertEquals(60, av60.getIntervalMinutes());
     }
