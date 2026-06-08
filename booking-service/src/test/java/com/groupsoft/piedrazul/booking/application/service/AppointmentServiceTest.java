@@ -20,24 +20,27 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+// @ExtendWith(MockitoExtension.class): habilita Mockito en JUnit 5 para pruebas con mocks.
 @ExtendWith(MockitoExtension.class)
 class AppointmentServiceTest {
 
+    // Dependencias simuladas con @Mock.
     @Mock
     private AppointmentRepository repository;
 
     @Mock
     private AppointmentEventPublisher eventPublisher;
 
+    // @InjectMocks: crea una instancia real de AppointmentService e inyecta los mocks.
     @InjectMocks
     private AppointmentService appointmentService;
 
     private AppointmentRequestDTO requestDTO;
     private Appointment appointment;
 
+    // Configuración inicial antes de cada prueba.
     @BeforeEach
     void setUp() {
-
         requestDTO = new AppointmentRequestDTO();
         requestDTO.setPatientId(1L);
         requestDTO.setDoctorId(10L);
@@ -56,9 +59,9 @@ class AppointmentServiceTest {
                 .build();
     }
 
+    // ✅ Caso exitoso: creación de cita sin solapamiento.
     @Test
     void shouldCreateAppointmentSuccessfully() {
-
         when(repository.existsByDoctorIdAndAppointmentDate(
                 requestDTO.getDoctorId(),
                 requestDTO.getAppointmentDate()
@@ -78,9 +81,9 @@ class AppointmentServiceTest {
         verify(eventPublisher).publishAppointmentCreatedEvent(any());
     }
 
+    // ❌ Caso de error: cita solapada.
     @Test
     void shouldThrowExceptionWhenAppointmentOverlaps() {
-
         when(repository.existsByDoctorIdAndAppointmentDate(
                 requestDTO.getDoctorId(),
                 requestDTO.getAppointmentDate()
@@ -95,9 +98,9 @@ class AppointmentServiceTest {
         verify(eventPublisher, never()).publishAppointmentCreatedEvent(any());
     }
 
+    // 📅 Caso: listar citas por médico y fecha.
     @Test
     void shouldReturnAppointmentsByDoctorAndDate() {
-
         LocalDate date = LocalDate.of(2026,5,28);
 
         when(repository.findByDoctorIdAndAppointmentDateBetween(
@@ -113,9 +116,9 @@ class AppointmentServiceTest {
         assertEquals(1L, result.get(0).getPatientId());
     }
 
+    // 📭 Caso: no existen citas en la fecha.
     @Test
     void shouldReturnEmptyListWhenNoAppointmentsExist() {
-
         LocalDate date = LocalDate.of(2026,5,28);
 
         when(repository.findByDoctorIdAndAppointmentDateBetween(
@@ -130,9 +133,9 @@ class AppointmentServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    // 🔔 Caso: verificar que se publique evento tras guardar cita.
     @Test
     void shouldPublishEventAfterSavingAppointment() {
-
         when(repository.existsByDoctorIdAndAppointmentDate(
                 anyLong(),
                 any(LocalDateTime.class)
