@@ -1,48 +1,85 @@
 package com.groupsoft.piedrazul.user.application.service;
+// Paquete de pruebas unitarias para la capa de aplicación del bounded context User
 
-import com.groupsoft.piedrazul.user.application.dto.UserWhatsAppDTO;
-import com.groupsoft.piedrazul.user.domain.model.Gender;
-import com.groupsoft.piedrazul.user.domain.model.Role;
-import com.groupsoft.piedrazul.user.domain.model.User;
-import com.groupsoft.piedrazul.user.domain.Repository.UserRepository;
-import com.groupsoft.piedrazul.user.infrastructure.config.RabbitMQConfig;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import com.groupsoft.piedrazul.user.application.dto.UserWhatsAppDTO; 
+// DTO que representa los datos de usuario recibidos desde WhatsApp
 
-import java.time.LocalDate;
-import java.util.Optional;
+import com.groupsoft.piedrazul.user.domain.model.Gender; 
+// Enum del dominio que define el género del usuario
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import com.groupsoft.piedrazul.user.domain.model.Role; 
+// Enum del dominio que define el rol del usuario (ej. PATIENT, ADMIN)
+
+import com.groupsoft.piedrazul.user.domain.model.User; 
+// Entidad del dominio que representa un usuario
+
+import com.groupsoft.piedrazul.user.domain.Repository.UserRepository; 
+// Repositorio JPA para acceder y persistir usuarios en la base de datos
+
+import com.groupsoft.piedrazul.user.infrastructure.config.RabbitMQConfig; 
+// Configuración de RabbitMQ, contiene nombres de colas
+
+import org.junit.jupiter.api.BeforeEach; 
+// Anotación de JUnit 5 para ejecutar un método antes de cada prueba
+
+import org.junit.jupiter.api.Test; 
+// Anotación de JUnit 5 para definir un método de prueba
+
+import org.junit.jupiter.api.extension.ExtendWith; 
+// Permite extender el comportamiento de JUnit con extensiones (ej. Mockito)
+
+import org.mockito.InjectMocks; 
+// Inyecta los mocks en la clase bajo prueba (UserService)
+
+import org.mockito.Mock; 
+// Marca un objeto como mock (dependencia simulada, ej. repositorio o RabbitTemplate)
+
+import org.mockito.junit.jupiter.MockitoExtension; 
+// Extensión de Mockito para integrarse con JUnit 5
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate; 
+// Componente de Spring AMQP para enviar mensajes a RabbitMQ
+
+import java.time.LocalDate; 
+// Clase estándar de Java para manejar fechas
+
+import java.util.Optional; 
+// Clase estándar de Java para manejar valores opcionales
+
+import static org.junit.jupiter.api.Assertions.*; 
+// Métodos de aserción de JUnit (assertEquals, assertTrue, assertNotNull, etc.)
+
+import static org.mockito.ArgumentMatchers.any; 
+// Matcher de Mockito para aceptar cualquier argumento en un mock
+
+import static org.mockito.ArgumentMatchers.eq; 
+// Matcher de Mockito para verificar igualdad exacta de argumentos
+
+import static org.mockito.Mockito.*; 
+// Métodos de verificación y configuración de Mockito (when, verify, times, never, etc.)
 
 /**
  * Pruebas unitarias para UserService.
  * Cubre la lógica Find-or-Create y la publicación de eventos (Observer) a RabbitMQ.
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class) // Extiende JUnit con soporte de Mockito
 class UserServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepository userRepository; // Mock del repositorio de usuarios
 
     @Mock
-    private RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate; // Mock del componente RabbitTemplate
 
     @InjectMocks
-    private UserService userService;
+    private UserService userService; // Clase bajo prueba (SUT)
 
-    private UserWhatsAppDTO requestDTO;
-    private User existingUser;
+    private UserWhatsAppDTO requestDTO; // DTO de entrada para pruebas
+    private User existingUser;          // Usuario simulado ya existente
 
     @BeforeEach
     void setUp() {
+        // Configuración inicial antes de cada prueba
         requestDTO = new UserWhatsAppDTO();
         requestDTO.setDocumentNumber("1061234567");
         requestDTO.setFirstName("Carlos Andres");
@@ -52,6 +89,7 @@ class UserServiceTest {
         requestDTO.setBirthDate(LocalDate.of(1998, 5, 10));
         requestDTO.setEmail("carlos@test.com");
 
+        // Usuario simulado ya existente en BD
         existingUser = User.createPatientFromWhatsApp(
                 "1061234567", "Carlos Andres", "Caicedo Daza",
                 "+573001234567", Gender.HOMBRE,
@@ -65,17 +103,16 @@ class UserServiceTest {
 
     @Test
     void shouldReturnExistingUserWhenFoundByDocument() {
-        // Arrange
+        // Arrange - usuario encontrado por documento
         when(userRepository.findByDocumentNumber("1061234567"))
                 .thenReturn(Optional.of(existingUser));
 
         // Act
         User result = userService.registerOrGetUserFromWhatsApp(requestDTO);
 
-        // Assert
+        // Assert - retorna usuario existente, no guarda duplicado
         assertEquals(101L, result.getId());
         assertEquals("Carlos Andres Caicedo Daza", result.getFullName());
-        // Nunca debe guardarse un duplicado
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -90,7 +127,7 @@ class UserServiceTest {
         // Act
         User result = userService.registerOrGetUserFromWhatsApp(requestDTO);
 
-        // Assert
+        // Assert - retorna usuario existente por teléfono
         assertEquals(101L, result.getId());
         verify(userRepository, never()).save(any(User.class));
     }
@@ -107,16 +144,15 @@ class UserServiceTest {
         // Act
         User result = userService.registerOrGetUserFromWhatsApp(requestDTO);
 
-        // Assert
+        // Assert - se crea y guarda nuevo usuario
         assertNotNull(result);
         assertEquals(Role.PATIENT, result.getRole());
-        // save() debe haberse llamado exactamente una vez
         verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void newUserShouldHaveRolePatientAndBeActive() {
-        // Arrange
+        // Arrange - nuevo usuario sin documento ni teléfono en BD
         when(userRepository.findByDocumentNumber(anyString()))
                 .thenReturn(Optional.empty());
         when(userRepository.findByPhone(anyString()))
@@ -131,7 +167,7 @@ class UserServiceTest {
         // Act
         User result = userService.registerOrGetUserFromWhatsApp(requestDTO);
 
-        // Assert
+        // Assert - nuevo usuario debe ser paciente y estar activo
         assertEquals(Role.PATIENT, result.getRole());
         assertTrue(result.isActive());
     }
