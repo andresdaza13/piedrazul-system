@@ -1,10 +1,22 @@
 package com.groupsoft.piedrazul.user.domain.model;
+// Paquete del dominio User, contiene la entidad principal User
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDate;
-import java.util.UUID;
+import jakarta.persistence.*; 
+// Anotaciones de JPA para mapear la entidad a la base de datos
 
+import lombok.*; 
+// Anotaciones de Lombok para generar automáticamente getters, setters, constructores y builder
+
+import java.time.LocalDate; 
+// Clase estándar de Java para manejar fechas
+
+import java.util.UUID; 
+// Clase estándar de Java para generar identificadores únicos (contraseñas UUID)
+
+/**
+ * Entidad User que representa a los usuarios del sistema.
+ * Se mapea a la tabla "app_users" en la base de datos.
+ */
 @Entity
 @Table(name = "app_users")
 @Getter 
@@ -15,61 +27,81 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    // Identificador único autogenerado en la BD
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false) 
+    // Username único y obligatorio
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false) 
+    // Contraseña obligatoria
     private String password;
 
-    private String fullName;
+    private String fullName; 
+    // Nombre completo del usuario
     
-    @Column(unique = true)
+    @Column(unique = true) 
+    // Número de documento único
     private String documentNumber;
     
-    private String phone;
+    private String phone; 
+    // Teléfono del usuario
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) 
+    // Rol del usuario (PATIENT, DOCTOR, etc.)
     private Role role;
 
-    private boolean active;
+    private boolean active; 
+    // Estado de actividad del usuario
 
-    @Column(name = "doctor_id")
+    @Column(name = "doctor_id") 
+    // Relación opcional con un doctor
     private Long doctorId;
 
     // --- NUEVOS CAMPOS REQUISITO 2 ---
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) 
+    // Género del usuario
     private Gender gender;
 
-    private LocalDate birthDate; // Opcional según requerimiento
+    private LocalDate birthDate; 
+    // Fecha de nacimiento (opcional)
     
-    @Column(unique = true)
-    private String email; // Opcional según requerimiento
+    @Column(unique = true) 
+    // Correo electrónico único (opcional)
+    private String email;
 
-   // patron de fábrica para creación de pacientes desde WhatsApp
-   //explicame como funciona este método y por qué es útil en el contexto de tu aplicación
-   // Este método está diseñado para crear una instancia de User específicamente para pacientes que se registran a través de WhatsApp.
-   // En el contexto de tu aplicación, es común que los pacientes no tengan una cuenta tradicional con credenciales web, sino que se comuniquen y registren a través de WhatsApp.
-   // Este método toma los datos básicos que se pueden obtener de WhatsApp (como el número de documento, nombre, teléfono, género, fecha de nacimiento y correo electrónico) y los mapea a un objeto User.
-   // Además, asigna automáticamente el rol de PATIENT y genera un username y password únicos para asegurar la integridad de la base de datos, aunque estos pacientes no usarán credenciales web inicialmente.  
+    /**
+     * Patrón de fábrica para creación de pacientes desde WhatsApp.
+     * Este método está diseñado para crear una instancia de User específicamente para pacientes que se registran a través de WhatsApp.
+     * En el contexto de la aplicación, es común que los pacientes no tengan una cuenta tradicional con credenciales web,
+     * sino que se comuniquen y registren a través de WhatsApp.
+     * 
+     * El método toma los datos básicos obtenidos de WhatsApp (documento, nombre, teléfono, género, fecha de nacimiento y correo)
+     * y los mapea a un objeto User. Además:
+     * - Asigna automáticamente el rol de PATIENT.
+     * - Genera un username temporal basado en el número de documento.
+     * - Genera una contraseña UUID única para asegurar integridad en la BD.
+     * - Marca al usuario como activo por defecto.
+     */
     public static User createPatientFromWhatsApp(String documentNumber, String firstName, 
                                                  String lastName, String phone, 
                                                  Gender gender, LocalDate birthDate, String email) {
         return User.builder()
-                // Mapeo inteligente: Concatenamos para respetar tu campo fullName existente
+                // Concatenación de nombre y apellido con trim para evitar espacios extra
                 .fullName(firstName.trim() + " " + lastName.trim())
                 .documentNumber(documentNumber)
                 .phone(phone)
                 .gender(gender)
                 .birthDate(birthDate)
                 .email(email)
-                // Autoconfiguración de seguridad y roles
+                // Configuración automática de rol y estado
                 .role(Role.PATIENT)
                 .active(true)
-                // Al no tener credenciales web aún, aseguramos la integridad de la BD
+                // Username temporal = número de documento
                 .username(documentNumber) 
+                // Contraseña UUID generada automáticamente
                 .password(UUID.randomUUID().toString()) 
                 .build();
     }
