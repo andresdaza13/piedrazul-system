@@ -1,23 +1,75 @@
 package com.groupsoft.piedrazul.booking.application.facade;
+// Paquete donde se ubican las pruebas unitarias de la capa de aplicación (Facade) 
+// dentro del bounded context Booking.
 
-import com.groupsoft.piedrazul.booking.application.dto.AppointmentResponseDTO;
-import com.groupsoft.piedrazul.booking.application.dto.WebBookingRequestDTO;
-import com.groupsoft.piedrazul.booking.application.service.AppointmentService;
-import com.groupsoft.piedrazul.booking.infrastructure.adapter.AvailabilityClientAdapter;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+// ─────────────────────────────────────────────
+// Imports de clases propias del dominio y aplicación
+// ─────────────────────────────────────────────
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
+import com.groupsoft.piedrazul.booking.application.dto.AppointmentResponseDTO; 
+// DTO de respuesta para citas (aunque en este test no se usa directamente).
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import com.groupsoft.piedrazul.booking.application.dto.WebBookingRequestDTO; 
+// DTO que representa la solicitud de agendamiento vía portal web.
+
+import com.groupsoft.piedrazul.booking.application.service.AppointmentService; 
+// Servicio de aplicación encargado de la lógica de creación de citas.
+
+import com.groupsoft.piedrazul.booking.infrastructure.adapter.AvailabilityClientAdapter; 
+// Adapter para consultar disponibilidad de médicos en el microservicio de disponibilidad.
+
+// ─────────────────────────────────────────────
+// Imports de JUnit 5 para pruebas unitarias
+// ─────────────────────────────────────────────
+
+import org.junit.jupiter.api.BeforeEach; 
+// Anotación para ejecutar un método antes de cada prueba.
+
+import org.junit.jupiter.api.Test; 
+// Anotación para marcar un método como caso de prueba.
+
+import org.junit.jupiter.api.extension.ExtendWith; 
+// Permite extender el comportamiento de JUnit con extensiones (ej. Mockito).
+
+// ─────────────────────────────────────────────
+// Imports de Mockito para simulación de dependencias
+// ─────────────────────────────────────────────
+
+import org.mockito.InjectMocks; 
+// Inyecta los mocks en la clase bajo prueba (SUT).
+
+import org.mockito.Mock; 
+// Marca un objeto como mock (dependencia simulada).
+
+import org.mockito.junit.jupiter.MockitoExtension; 
+// Extensión de Mockito para integrarse con JUnit 5.
+
+// ─────────────────────────────────────────────
+// Imports de Java estándar para fechas y colecciones
+// ─────────────────────────────────────────────
+
+import java.time.LocalDate; 
+// Representa una fecha sin zona horaria.
+
+import java.time.LocalTime; 
+// Representa una hora del día sin fecha.
+
+import java.util.List; 
+// Colección de tipo lista para manejar slots disponibles.
+
+// ─────────────────────────────────────────────
+// Imports estáticos para simplificar llamadas en pruebas
+// ─────────────────────────────────────────────
+
+import static org.junit.jupiter.api.Assertions.*; 
+// Métodos de aserción de JUnit (assertEquals, assertTrue, etc.).
+
+import static org.mockito.ArgumentMatchers.any; 
+// Matcher de Mockito para aceptar cualquier argumento en un mock.
+
+import static org.mockito.Mockito.*; 
+// Métodos de verificación y configuración de Mockito (when, verify, times, never, etc.).
+
 
 /**
  * Pruebas unitarias para WebBookingFacade.
@@ -27,18 +79,19 @@ import static org.mockito.Mockito.*;
 class WebBookingFacadeTest {
 
     @Mock
-    private AvailabilityClientAdapter availabilityAdapter;
+    private AvailabilityClientAdapter availabilityAdapter; // Adapter para consultar disponibilidad
 
     @Mock
-    private AppointmentService appointmentService;
+    private AppointmentService appointmentService; // Servicio de creación de citas
 
     @InjectMocks
-    private WebBookingFacade webBookingFacade;
+    private WebBookingFacade webBookingFacade; // Facade bajo prueba (SUT)
 
-    private WebBookingRequestDTO request;
+    private WebBookingRequestDTO request; // DTO de entrada para pruebas
 
     @BeforeEach
     void setUp() {
+        // Construcción de un request de prueba
         request = new WebBookingRequestDTO();
         request.setPatientId(1L);
         request.setDoctorId(10L);
