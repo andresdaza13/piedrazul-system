@@ -6,8 +6,9 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 // @Data (Lombok): genera automáticamente getters, setters, equals, hashCode y toString.
-// @Builder (Lombok): permite construir objetos de manera flexible usando el patrón Builder.
-// Esto es útil cuando se quiere crear instancias con solo algunos campos o con mayor legibilidad.
+// Esto reduce código repetitivo y mejora la mantenibilidad.
+// @Builder (Lombok): habilita el patrón Builder, permitiendo construir objetos
+// de manera más legible y flexible, útil en respuestas REST.
 @Data
 @Builder
 public class AppointmentResponseDTO {
@@ -22,10 +23,11 @@ public class AppointmentResponseDTO {
     private Long doctorId;
 
     // Fecha y hora programada de la cita.
+    // Se usa LocalDateTime para manejar fecha y hora en un solo campo.
     private LocalDateTime appointmentDate;
 
     // Estado actual de la cita (ej. PENDIENTE, CONFIRMADA, CANCELADA, REAGENDADA).
-    // Se define en el dominio como un enum AppointmentStatus.
+    // Este campo refleja el uso del patrón State en el dominio.
     private AppointmentStatus status;
 
     // Número de WhatsApp del paciente, usado para notificaciones.
